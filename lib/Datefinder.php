@@ -158,10 +158,7 @@ class Datefinder extends QuestionnaireQuestion implements QuestionType
             $this->insertDateIntoCalendars($best);
         } else {
             //Benachrichtige den Master, dass er die Auswertung vornehmen soll:
-            $questionadata = $this['questiondata'];
-            $questionadata['status'] = "needsmanualevaluation";
-            $this['questiondata'] = $questionadata;
-            $this['chdate'] = time();
+            $this['questiondata']['status'] = "needsmanualevaluation";
             $success = $this->store();
         }
     }
@@ -205,10 +202,8 @@ class Datefinder extends QuestionnaireQuestion implements QuestionType
                 );
             }
         }
-        $questiondata = $this['questiondata']->getArrayCopy();
-        $questiondata['founddate'] = $date;
-        $questiondata['status'] = "founddate";
-        $this['questiondata'] = $questiondata;
+        $this['questiondata']['founddate'] = $date;
+        $this['questiondata']['status'] = "founddate";
         $this->store();
     }
 
