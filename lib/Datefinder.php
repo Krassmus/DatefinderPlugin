@@ -178,6 +178,7 @@ class Datefinder extends QuestionnaireQuestion implements QuestionType
                 $event_data['editor_id'] = $this->questionnaire->user_id;
                 $event_data['summary'] = $this->questionnaire->title;
                 $event_data['description'] = $this['questiondata']['question'];
+                $event_data['category_intern'] = 1;
                 $event_data->store();
 
                 $event = new CalendarEvent();
