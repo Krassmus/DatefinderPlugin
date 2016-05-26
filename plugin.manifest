@@ -3,3 +3,4 @@ pluginclassname=DatefinderPlugin
 version=1.0
 origin=RasmusFuhse
 studipMinVersion=3.4
+studipMaxVersion=3.6
