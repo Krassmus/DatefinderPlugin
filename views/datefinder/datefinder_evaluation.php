@@ -1,12 +1,13 @@
+<? $etask = $vote->etask; ?>
 <h3>
-    <?= formatReady($vote['questiondata']['question']) ?>
+    <?= formatReady($etask->description) ?>
 </h3>
 
 <?
-$data = $vote['questiondata']->getArrayCopy();
+$taskDates = $etask->task['dates'] ?: [];
 $results = array();
 $results_users = array();
-foreach ($data['dates'] as $date) {
+foreach ($taskDates as $date) {
     $results[$date] = 0;
     $results_users[$date] = array();
 }
@@ -22,10 +23,10 @@ foreach ($vote->answers as $answer) {
 }
 ?>
 
-<? if ($vote['questiondata']['status'] === "needsmanualevaluation") :
+<? if ($etask->task['status'] === "needsmanualevaluation") :
     $best = array();
     $new_best = array();
-    foreach ($data['dates'] as $date) {
+    foreach ($taskDates as $date) {
         if (!count($best) || ($results[$date] > $results[$best[0]])) {
             $best = array($date);
         } elseif ($results[$date] == $results[$best[0]]) {
@@ -52,12 +53,12 @@ foreach ($vote->answers as $answer) {
     </div>
 <? endif ?>
 
-<? if ($vote['questiondata']['status'] === "founddate") : ?>
+<? if ($etask->task['status'] === "founddate") : ?>
     <div style="text-align: center;">
         <div class="selected_date" style="margin: 5px; padding: 5px; border: thin solid #b8c2d5; display: inline-block;">
-            <?= Icon::create("accept", "status-green")->asImg("28") ?>
-            <div style="font-size: 2em;"><?= date("H:i", $vote['questiondata']['founddate']) ?></div>
-            <div><?= date("d.m.Y", $vote['questiondata']['founddate']) ?></div>
+            <?= Icon::create("accept", "status-green")->asImg(28) ?>
+            <div style="font-size: 2em;"><?= date("H:i", $etask->task['founddate']) ?></div>
+            <div><?= date("d.m.Y", $etask->task['founddate']) ?></div>
         </div>
     </div>
 <? endif ?>
@@ -65,7 +66,7 @@ foreach ($vote->answers as $answer) {
 <table class="default nohover">
     <tbody>
     <? $countAnswers = $vote->questionnaire->countAnswers() ?>
-    <? foreach ($vote['questiondata']['dates'] as $key => $date) : ?>
+    <? foreach ($etask->task['dates'] as $key => $date) : ?>
         <tr>
             <? $percentage = $countAnswers ? round((int) $results[$date] / $countAnswers * 100) : 0 ?>
             <td style="text-align: right; background-size: <?= $percentage ?>% 100%; background-position: right center; background-image: url('<?= Assets::image_path("vote_lightgrey.png") ?>'); background-repeat: no-repeat;" width="50%">

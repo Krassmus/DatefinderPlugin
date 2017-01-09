@@ -1,14 +1,15 @@
 <?
+$etask = $vote->etask;
 $answer = $vote->getMyAnswer();
 $answerdata = $answer['answerdata'] ? $answer['answerdata']->getArrayCopy() : array();
 ?>
 
 <h3>
-    <?= formatReady($vote['questiondata']['question']) ?>
+    <?= formatReady($etask->description) ?>
 </h3>
 
 <div style="max-height: none; opacity: 1;">
-    <strong><?= _("Dauer") ?></strong>: <?= htmlReady($vote['questiondata']['duration']) ?> <?= _("Stunden") ?>
+    <strong><?= _("Dauer") ?></strong>: <?= htmlReady($etask->task['duration']) ?> <?= _("Stunden") ?>
 </div>
 
 
@@ -21,17 +22,17 @@ $answerdata = $answer['answerdata'] ? $answer['answerdata']->getArrayCopy() : ar
         </tr>
     </thead>
     <tbody>
-        <? foreach ($vote['questiondata']['dates'] as $date) : ?>
+        <? foreach ($etask->task['dates'] as $date) : ?>
             <tr>
                 <td>
                     <a href="<?= URLHelper::getLink("dispatch.php/calendar/single/day", array('atime' => $date - 3 * 60 * 60)) ?>" data-dialog>
-                        <?= Assets::img("icons/blue/16/date", array('class' => "text-bottom")) ?>
+                        <?= Icon::create('date')->asImg([ 'class' => "text-bottom" ]) ?>
                         <?= date("d.m.Y H:i", $date) ?>
                     </a>
                 </td>
                 <td>
                     <ul class="clean">
-                    <? $conflicts = $vote->getConflictingSchedules($date, $date + (60 * 60 * $vote['questiondata']['duration'])) ?>
+                    <? $conflicts = $vote->getConflictingSchedules($date, $date + (60 * 60 * $etask->task['duration'])) ?>
                     <? foreach ($conflicts as $schedule) : ?>
                         <li>
                             <a href="<?= URLHelper::getLink($schedule['rangetype'] === "user"
@@ -39,7 +40,7 @@ $answerdata = $answer['answerdata'] ? $answer['answerdata']->getArrayCopy() : ar
                                 : ($schedule['rangetype'] === "course" ? "dispatch.php/course/dates/details/".$schedule['id']."?cid=".$schedule['range_id'] : "#")) ?>"
                                 data-dialog
                                 title="<?= _("Hier haben Sie eigentlich schon was vor.") ?>">
-                                <?= Assets::img("icons/blue/16/decline/date", array('class' => "text-bottom")) ?>
+                                <?= Icon::create('date+decline')->asImg([ 'class' => "text-bottom" ]) ?>
                                 <strong><?= htmlReady($schedule['title']) ?></strong>:
                                 <?= date("d.m.Y H:i", $schedule['start']) ?> - <?= date("d.m.Y H:i", $schedule['end']) ?>
                             </a>
@@ -48,7 +49,10 @@ $answerdata = $answer['answerdata'] ? $answer['answerdata']->getArrayCopy() : ar
                     </ul>
                 </td>
                 <td>
-                    <input type="checkbox" name="answers[<?= $vote->getId() ?>][answerdata][dates][]" value="<?= htmlReady($date) ?>"<?= ($answer->isNew() ? (!count($conflicts)) : in_array($date, (array) $answerdata['dates'])) ? " checked" : "" ?>>
+                    <input type="checkbox"
+                           name="answers[<?= $vote->getId() ?>][answerdata][dates][]"
+                           value="<?= htmlReady($date) ?>"
+                           <?= ($answer->isNew() ? (!count($conflicts)) : in_array($date, (array) $answerdata['dates'])) ? " checked" : "" ?>>
                 </td>
             </tr>
         <? endforeach ?>
