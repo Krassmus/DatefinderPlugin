@@ -2,6 +2,8 @@
 
 require_once 'lib/classes/QuestionType.interface.php';
 
+use eTask\Task;
+
 class Datefinder extends QuestionnaireQuestion implements QuestionType
 {
     static public function getIcon($active = false, $add = false)
@@ -25,20 +27,43 @@ class Datefinder extends QuestionnaireQuestion implements QuestionType
     public function createDataFromRequest()
     {
         $questions = Request::getArray("questions");
-        $question_data = $questions[$this->getId()];
+        $data = $questions[$this->getId()];
 
-        $dates = array();
-        foreach ($question_data['questiondata']['day'] as $key => $date) {
+        // create a new eTask if this is a new question
+        if (!$this->etask) {
+            $this->etask = Task::create(
+                [
+                    'type' => 'datefinder',
+                    'user_id' => $GLOBALS['user']->id,
+                    'created' => date('c', time())
+                ]
+            );
+        }
+
+        // update description
+        $this->etask->description = $data['questiondata']['question'];
+
+        // prepare dates
+        $dates = [];
+        foreach ($data['questiondata']['day'] as $key => $date) {
             if (trim($date)) {
-                $dates[] = strtotime($date . " " . $question_data['questiondata']['time'][$key]);
+                $dates[] = strtotime($date . ' ' . $data['questiondata']['time'][$key]);
             }
         }
         sort($dates);
-        unset($question_data['questiondata']['day']);
-        unset($question_data['questiondata']['time']);
-        $question_data['questiondata']['dates'] = $dates;
 
-        $this->setData($question_data);
+        // update eTask
+        $task = [
+            'automatic' => $data['questiondata']['automatic'],
+            'dates' => $dates,
+            'duration' => $data['questiondata']['duration']
+        ];
+
+        $this->etask->task = $task;
+
+
+        // store the eTask instance
+        $this->etask->store();
     }
 
     public function getDisplayTemplate()
@@ -60,7 +85,7 @@ class Datefinder extends QuestionnaireQuestion implements QuestionType
 
     public function getResultTemplate($only_user_ids = null)
     {
-        if ($this['questiondata']['status'] === "needsmanualevaluation"
+        if ($this->etask->task['status'] === "needsmanualevaluation"
                 && $this->questionnaire->isStopped()) {
             $this->onEnding();
         } else {
@@ -116,11 +141,18 @@ class Datefinder extends QuestionnaireQuestion implements QuestionType
         return $events;
     }
 
+    public function onBeginning()
+    {
+        $this->etask->task['founddate'] = '';
+        $this->etask->task['status'] = '';
+        $this->etask->store();
+    }
+
     public function onEnding()
     {
         $this->alterDynamicAnswers();
 
-        $data = $this['questiondata']->getArrayCopy();
+        $data = $this->etask->task->getArrayCopy();
         $results = array();
         $results_users = array();
         foreach ($data['dates'] as $date) {
@@ -153,13 +185,13 @@ class Datefinder extends QuestionnaireQuestion implements QuestionType
                 }
             }
         }
-        if ($simply_the_best && $this['questiondata']['automatic']) {
+        if ($simply_the_best && $data['automatic']) {
             //Erstelle den Termin und/oder benachrichtige die Teilnehmer
             $this->insertDateIntoCalendars($best);
         } else {
             //Benachrichtige den Master, dass er die Auswertung vornehmen soll:
-            $this['questiondata']['status'] = "needsmanualevaluation";
-            $success = $this->store();
+            $this->etask->task['status'] = "needsmanualevaluation";
+            $this->etask->store();
         }
     }
 
@@ -173,11 +205,11 @@ class Datefinder extends QuestionnaireQuestion implements QuestionType
             if (in_array($date, $fitting_dates)) {
                 $event_data = new EventData();
                 $event_data['start'] = $date;
-                $event_data['end'] = $date + $this['questiondata']['duration'] * 60 * 60;
+                $event_data['end'] = $date + $this->etask->task['duration'] * 60 * 60;
                 $event_data['author_id'] = $this->questionnaire->user_id;
                 $event_data['editor_id'] = $this->questionnaire->user_id;
                 $event_data['summary'] = $this->questionnaire->title;
-                $event_data['description'] = $this['questiondata']['question'];
+                $event_data['description'] = $this->etask->description;
                 $event_data['category_intern'] = 1;
                 $event_data->store();
 
@@ -203,9 +235,9 @@ class Datefinder extends QuestionnaireQuestion implements QuestionType
                 );
             }
         }
-        $this['questiondata']['founddate'] = $date;
-        $this['questiondata']['status'] = "founddate";
-        $this->store();
+        $this->etask->task['founddate'] = $date;
+        $this->etask->task['status'] = 'founddate';
+        $this->etask->store();
     }
 
     private function alterDynamicAnswers()
@@ -215,7 +247,7 @@ class Datefinder extends QuestionnaireQuestion implements QuestionType
                 $answerdata = $answer['answerdata']->getArrayCopy();
                 $filtereddates = array();
                 foreach ($answerdata['dates'] as $date) {
-                    $conflicts = $this->getConflictingSchedules($date, $date + $this['questiondata']['duration'] * 60 * 60, $answer['user_id']);
+                    $conflicts = $this->getConflictingSchedules($date, $date + $this->etask->task['duration'] * 60 * 60, $answer['user_id']);
                     if (count($conflicts) === 0) {
                         $filtereddates[] = $date;
                     }
