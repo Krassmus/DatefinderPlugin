@@ -38,8 +38,8 @@ foreach ($vote->answers as $answer) {
         <? foreach ($best as $bestdate) : ?>
             <? if ($vote->questionnaire->isEditable()) : ?>
                 <a href="<?= URLHelper::getLink("plugins.php/datefinderplugin/admin/choose_date/".$vote->getId()."/".$bestdate) ?>"
-                   title="<?= _("Wählen Sie diesen Termin aus.") ?>"
-                   onClick="return window.confirm('<?= _("Soll dieser Termin ausgewählt werden?") ?>');"
+                   title="<?= _("WÃ¤hlen Sie diesen Termin aus.") ?>"
+                   onClick="return window.confirm('<?= _("Soll dieser Termin ausgewÃ¤hlt werden?") ?>');"
                    <?= Request::isAjax() ? "data-dialog" : "" ?>>
             <? endif ?>
             <div class="select_date" style="margin: 5px; padding: 5px; border: thin solid #b8c2d5; display: inline-block;">

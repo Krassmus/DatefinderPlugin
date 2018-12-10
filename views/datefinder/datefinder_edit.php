@@ -22,10 +22,10 @@
 
 <label>
     <input type="checkbox" name="questions[<?= $vote->getId() ?>][questiondata][automatic]" value="1"<?= $vote->isNew() || $etask->task['automatic'] ? " checked" : ""?>>
-    <?= _("Nach Ende der Terminfindung automatisch den besten Termin auswählen und eintragen") ?>
+    <?= _("Nach Ende der Terminfindung automatisch den besten Termin auswÃ¤hlen und eintragen") ?>
 </label>
 
-<div style="display: none" class="delete_question"><?= _("Diesen Zeitpunkt wirklich löschen?") ?></div>
+<div style="display: none" class="delete_question"><?= _("Diesen Zeitpunkt wirklich lÃ¶schen?") ?></div>
 
 <script>
     jQuery(function () {

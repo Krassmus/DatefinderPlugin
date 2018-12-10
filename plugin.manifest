@@ -2,5 +2,4 @@ pluginname=DatefinderPlugin
 pluginclassname=DatefinderPlugin
 version=1.1
 origin=RasmusFuhse
-studipMinVersion=4.0.alpha-svn
-studipMaxVersion=4.0
+studipMinVersion=4.0

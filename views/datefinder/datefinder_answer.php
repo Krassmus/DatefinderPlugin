@@ -60,9 +60,9 @@ $answerdata = $answer['answerdata'] ? $answer['answerdata']->getArrayCopy() : ar
 </table>
 
 <label>
-    <?= _("Hinzukommende Termine in meinem Kalender berücksichtigen") ?>
+    <?= _("Hinzukommende Termine in meinem Kalender berÃ¼cksichtigen") ?>
     <select name="answers[<?= $vote->getId() ?>][answerdata][mode]" style="max-width: 100%;">
-        <option value="dynamic"><?= _("Ausgewählte Termine automatisch abwählen, wenn sich mein Kalender füllt.") ?></option>
-        <option value="static"><?= _("Hier ausgewählten Terminen auf jeden Fall zusagen.") ?></option>
+        <option value="dynamic"><?= _("AusgewÃ¤hlte Termine automatisch abwÃ¤hlen, wenn sich mein Kalender fÃ¼llt.") ?></option>
+        <option value="static"><?= _("Hier ausgewÃ¤hlten Terminen auf jeden Fall zusagen.") ?></option>
     </select>
 </label>
